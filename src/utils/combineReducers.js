@@ -125,7 +125,7 @@ export default function combineReducers(reducers) {
       var previousStateForKey = state[key]
       // 调用这个 reducer, 参数: 旧 state, 传入的 action
       var nextStateForKey = reducer(previousStateForKey, action)
-      // 如果又返回 undefined 的话, 会报错的
+      // 如果又返回 undefined 的话, 虽然按理说不会影响使用, 但还是会报错的
       if (typeof nextStateForKey === 'undefined') {
         var errorMessage = getUndefinedStateErrorMessage(key, action)
         throw new Error(errorMessage)

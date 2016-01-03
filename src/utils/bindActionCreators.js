@@ -1,6 +1,7 @@
 import mapValues from './mapValues'
 
 function bindActionCreator(actionCreator, dispatch) {
+  // 就是直接调用一下创造函数, 然后把返回值传入 dispatch 中激活事件而已
   return (...args) => dispatch(actionCreator(...args))
 }
 
@@ -36,7 +37,7 @@ export default function bindActionCreators(actionCreators, dispatch) {
       `Did you write "import ActionCreators from" instead of "import * as ActionCreators from"?`
     )
   }
-
+  // 假如传入的是数组 / 对象, 挨个转化一遍
   return mapValues(actionCreators, actionCreator =>
     bindActionCreator(actionCreator, dispatch)
   )

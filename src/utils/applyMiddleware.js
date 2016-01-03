@@ -17,16 +17,20 @@ import compose from './compose'
  * @returns {Function} A store enhancer applying the middleware.
  */
 export default function applyMiddleware(...middlewares) {
+  // 返回一个函数, 这个函数的参数是一个 creator 函数, 通过调用它来生成仓库
   return (next) => (reducer, initialState) => {
     var store = next(reducer, initialState)
     var dispatch = store.dispatch
     var chain = []
-
+    // 中间件只能获取到两样属性, 一个是原本的 state, 一个是事件触发器, 他会直接将事件转发到仓库的事件上去
     var middlewareAPI = {
       getState: store.getState,
       dispatch: (action) => dispatch(action)
     }
+    // 调用每一个中间件生成器, 生成中间件, 每个生成的中间件的参数都是 next
     chain = middlewares.map(middleware => middleware(middlewareAPI))
+    // 从后往前依次调用中间件
+    // 不断的将原本的 dispatch 包到中间件当中, 最终形成的是一个大包
     dispatch = compose(...chain)(store.dispatch)
 
     return {
