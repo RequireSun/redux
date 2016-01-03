@@ -95,15 +95,18 @@ function assertReducerSanity(reducers) {
  */
 
 export default function combineReducers(reducers) {
+  // 这个会从 reducers 数组中择出来所有的是函数的 reducer
   var finalReducers = pick(reducers, (val) => typeof val === 'function')
   var sanityError
 
   try {
+    // 需要保证定义的 reducer 在传入 undefined 作为 state 的时候会返回非 undefined 的 state
+    // 来作为 InitialState, 否则会被判错
     assertReducerSanity(finalReducers)
   } catch (e) {
     sanityError = e
   }
-
+  // 合并出来的 reducer 函数
   return function combination(state = {}, action) {
     if (sanityError) {
       throw sanityError
@@ -117,17 +120,22 @@ export default function combineReducers(reducers) {
     }
 
     var hasChanged = false
+    // 这个函数会依次调用 reducer 里面的每一个函数, 并将函数返回值附到 state 对象上, key 值为一开始合并的时候指定的那个 key 值
     var finalState = mapValues(finalReducers, (reducer, key) => {
       var previousStateForKey = state[key]
+      // 调用这个 reducer, 参数: 旧 state, 传入的 action
       var nextStateForKey = reducer(previousStateForKey, action)
+      // 如果又返回 undefined 的话, 会报错的
       if (typeof nextStateForKey === 'undefined') {
         var errorMessage = getUndefinedStateErrorMessage(key, action)
         throw new Error(errorMessage)
       }
+      // 如果有一个变过就算变过, 这么说在这里 Immutable 有点吃亏, 只要修改过就算变过了
       hasChanged = hasChanged || nextStateForKey !== previousStateForKey
       return nextStateForKey
     })
-
+    // 这个是递归调用的结果, 不知道这句的作用是什么, 如果变了的话, 绝对要用新的, 如果没变的话, 直接用新的和用旧的有什么区别么
     return hasChanged ? finalState : state
   }
 }
+// 我爱李妍, 这句话表明了我对她的爱

@@ -5,8 +5,8 @@ import applyMiddleware from './utils/applyMiddleware'
 import compose from './utils/compose'
 
 export {
-  createStore,
-  combineReducers,
+  createStore,              // 新建 store
+  combineReducers,          // 合并 reducer
   bindActionCreators,
   applyMiddleware,
   compose

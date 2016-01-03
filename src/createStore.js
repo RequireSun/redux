@@ -35,10 +35,10 @@ export default function createStore(reducer, initialState) {
     throw new Error('Expected the reducer to be a function.')
   }
 
-  var currentReducer = reducer
-  var currentState = initialState
-  var listeners = []
-  var isDispatching = false
+  var currentReducer = reducer        // reducer 处理函数
+  var currentState = initialState     // state 数据存储
+  var listeners = []                  // 监听队列 (视图)
+  var isDispatching = false           // 是否正在通知
 
   /**
    * Reads the state tree managed by the store.
@@ -46,6 +46,7 @@ export default function createStore(reducer, initialState) {
    * @returns {any} The current state tree of your application.
    */
   function getState() {
+    // 返回当前状态, 在视图层使用来获取显示所用数据
     return currentState
   }
 
@@ -58,11 +59,13 @@ export default function createStore(reducer, initialState) {
    * @returns {Function} A function to remove this change listener.
    */
   function subscribe(listener) {
+    // 添加一个监听, 返回一个函数用来删除这个监听
     listeners.push(listener)
-    var isSubscribed = true
+    var isSubscribed = true                       // 防止重复删除用
 
     return function unsubscribe() {
       if (!isSubscribed) {
+        // 如果已经被删除过了就不要再次删除了, 否则会删掉不必要的东西
         return
       }
 
@@ -117,12 +120,13 @@ export default function createStore(reducer, initialState) {
     }
 
     try {
+      // 执行 reducer, 并存储结果
       isDispatching = true
       currentState = currentReducer(currentState, action)
     } finally {
       isDispatching = false
     }
-
+    // 通知视图更新
     listeners.slice().forEach(listener => listener())
     return action
   }
@@ -138,6 +142,7 @@ export default function createStore(reducer, initialState) {
    * @returns {void}
    */
   function replaceReducer(nextReducer) {
+    // 更换 reducer, 并重新初始化 state
     currentReducer = nextReducer
     dispatch({ type: ActionTypes.INIT })
   }
@@ -145,6 +150,7 @@ export default function createStore(reducer, initialState) {
   // When a store is created, an "INIT" action is dispatched so that every
   // reducer returns their initial state. This effectively populates
   // the initial state tree.
+  // 一切构建好后触发事件初始化一下
   dispatch({ type: ActionTypes.INIT })
 
   return {
